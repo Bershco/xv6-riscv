@@ -10,8 +10,13 @@ uint64
 sys_exit(void)
 {
   int n;
+  char* exit_msg = "";
   argint(0, &n);
-  exit(n);
+  argstr(1, exit_msg, 32);
+  if (exit_msg == 0) {
+    exit_msg = "No exit message.";
+  }
+  exit(n, exit_msg);
   return 0;  // not reached
 }
 
@@ -31,8 +36,10 @@ uint64
 sys_wait(void)
 {
   uint64 p;
+  uint64 q;
   argaddr(0, &p);
-  return wait(p);
+  argaddr(1, &q);
+  return wait(p, q);
 }
 
 uint64
@@ -88,4 +95,9 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64
+sys_memsize(void) {
+  return myproc()->sz;
 }
