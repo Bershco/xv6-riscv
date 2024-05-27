@@ -56,6 +56,8 @@ procinit(void)
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
   }
+  p->affinity_mask = 0;
+  p->effective_affinity_mask = 0;
 }
 
 // Must be called with interrupts disabled,
@@ -119,6 +121,8 @@ allocproc(void)
       release(&p->lock);
     }
   }
+  p->affinity_mask = 0;
+  p->effective_affinity_mask = 0;
   return 0;
 
 found:
@@ -169,6 +173,8 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->affinity_mask = 0;
+  p->effective_affinity_mask = 0;
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -311,6 +317,7 @@ fork(void)
   safestrcpy(np->name, p->name, sizeof(p->name));
 
   pid = np->pid;
+  np->affinity_mask = p->affinity_mask;
 
   release(&np->lock);
 
@@ -466,6 +473,17 @@ scheduler(void)
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
+        intr_off();
+        int id = cpuid();
+        intr_on();
+        int dummy;
+        if (p->effective_affinity_mask == 0) {
+          p->effective_affinity_mask = p->affinity_mask;
+        }
+        dummy = p->effective_affinity_mask >> id;
+        if (dummy % 2 == 0 && p->affinity_mask != 0) {
+          continue;
+        }
         p->state = RUNNING;
         c->proc = p;
         swtch(&c->context, &p->context);
@@ -511,7 +529,11 @@ void
 yield(void)
 {
   struct proc *p = myproc();
+  int cid = cpuid();
   acquire(&p->lock);
+  if (p-> affinity_mask != 0) {
+    p->effective_affinity_mask -= (1 << cid);
+  }
   p->state = RUNNABLE;
   sched();
   release(&p->lock);

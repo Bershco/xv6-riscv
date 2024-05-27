@@ -4,5 +4,6 @@
 
 int main(int argc, char *argv[])
 {
-    exit(0, "Goodbye World xv6");
+    char* exitmsg = "Goodbye World xv6";
+    exit(0, exitmsg);
 }

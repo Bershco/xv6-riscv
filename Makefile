@@ -120,6 +120,7 @@ UPROGS=\
 	$U/_echo\
 	$U/_helloworld\
 	$U/_memsize_test\
+	$U/_affinity_test\
 	$U/_goodbye\
 	$U/_forktest\
 	$U/_grep\

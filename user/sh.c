@@ -169,7 +169,7 @@ main(void)
       runcmd(parsecmd(buf));
     char msg[32];
     wait(0, msg);
-    if (msg !=0)  {
+    if (msg[0] != '\0')  {
       printf("%s\n", msg);
     }
   }
