@@ -10,12 +10,18 @@ uint64
 sys_exit(void)
 {
   int n;
-  char* exit_msg = "";
+  char exit_msg[32];
+  char nullrepresent[32];
+
+
   argint(0, &n);
-  argstr(1, exit_msg, 32);
-  if (exit_msg == 0) {
-    exit_msg = "No exit message.";
-  }
+  argstr(1, exit_msg, sizeof(exit_msg));
+
+  fetchstr(0, nullrepresent, sizeof(nullrepresent)); 
+
+  if (strncmp(exit_msg, nullrepresent, sizeof(exit_msg)) == 0)
+    exit(n, "No exit message.\n");
+    
   exit(n, exit_msg);
   return 0;  // not reached
 }
