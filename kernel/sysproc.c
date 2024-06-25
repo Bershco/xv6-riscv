@@ -21,7 +21,7 @@ sys_exit(void)
 
   if (strncmp(exit_msg, nullrepresent, sizeof(exit_msg)) == 0)
     exit(n, "No exit message.\n");
-    
+
   exit(n, exit_msg);
   return 0;  // not reached
 }
@@ -106,4 +106,14 @@ sys_uptime(void)
 uint64
 sys_memsize(void) {
   return myproc()->sz;
+}
+
+void
+sys_set_affinity_mask(void) {
+  int mask;
+  argint(0, &mask);
+  struct proc* p = myproc();
+  acquire(&p->lock);
+  p->affinity_mask = mask;
+  release(&p->lock);
 }
