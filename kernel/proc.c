@@ -473,15 +473,16 @@ scheduler(void)
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
-        intr_off();
+        //intr_off();
         int id = cpuid();
-        intr_on();
+        //intr_on();
         int dummy;
         if (p->effective_affinity_mask == 0) {
           p->effective_affinity_mask = p->affinity_mask;
         }
         dummy = p->effective_affinity_mask >> id;
         if (dummy % 2 == 0 && p->affinity_mask != 0) {
+          release(&p->lock);
           continue;
         }
         p->state = RUNNING;
